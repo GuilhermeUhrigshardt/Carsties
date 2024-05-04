@@ -4,7 +4,7 @@ using MassTransit;
 using MongoDB.Entities;
 using SearchService.Models;
 
-namespace SearchService.Consumer;
+namespace SearchService.Consumers;
 
 public class AuctionCreatedConsumer : IConsumer<AuctionCreated>
 {
@@ -20,6 +20,8 @@ public class AuctionCreatedConsumer : IConsumer<AuctionCreated>
         Console.WriteLine("--> Consuming auction create: " + context.Message.Id);
 
         var item = _mapper.Map<Item>(context.Message);
+
+        if (item.Model == "Foo") throw new ArgumentException("Cannot sell cars with name Foo");
 
         await item.SaveAsync();
     }

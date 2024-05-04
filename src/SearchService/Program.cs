@@ -2,7 +2,7 @@ using System.Net;
 using MassTransit;
 using Polly;
 using Polly.Extensions.Http;
-using SearchService.Consumer;
+using SearchService.Consumers;
 using SearchService.Data;
 using SearchService.Services;
 
@@ -20,6 +20,20 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((context, cfg) => 
     {
+        cfg.ReceiveEndpoint("search-auction-created", e=>
+        {
+            e.UseMessageRetry(r => r.Interval(5, 5));
+
+            e.ConfigureConsumer<AuctionCreatedConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("search-auction-updated", e=>
+        {
+            e.UseMessageRetry(r => r.Interval(5, 5));
+
+            e.ConfigureConsumer<AuctionUpdatedConsumer>(context);
+        });
+
         cfg.ConfigureEndpoints(context);
     });
 });
