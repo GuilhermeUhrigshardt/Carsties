@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace AuctionService.UnitTests;
+namespace AuctionService.UnitTests.Utils;
 
 public class Helpers
 {
