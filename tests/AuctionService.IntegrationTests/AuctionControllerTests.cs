@@ -9,7 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AuctionService.IntegrationTests;
 
-public class AuctionControllerTests : IClassFixture<CustomWebAppFactory>, IAsyncLifetime
+[Collection("Shared collection")]
+public class AuctionControllerTests : IAsyncLifetime
 {
     private readonly CustomWebAppFactory _factory;
     private readonly HttpClient _httpClient;
@@ -83,7 +84,7 @@ public class AuctionControllerTests : IClassFixture<CustomWebAppFactory>, IAsync
     {
         // arrange
         var auction = GetAuctionForCreate();
-         _httpClient.SetFakeJwtBearerToken(AuthHelper.GetBearerForUser("bob"));
+        _httpClient.SetFakeJwtBearerToken(AuthHelper.GetBearerForUser("bob"));
         
         // act
         var response = await _httpClient.PostAsJsonAsync("api/auctions", auction);
@@ -93,6 +94,21 @@ public class AuctionControllerTests : IClassFixture<CustomWebAppFactory>, IAsync
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var createdAucion = await response.Content.ReadFromJsonAsync<AuctionDto>();
         Assert.Equal("bob", createdAucion.Seller);
+    }
+
+    [Fact]
+    public async Task CreateAuction_WithInvalidAuctionDto_ShouldReturn400()
+    {
+        // arrange
+        var auction = GetAuctionForCreate();
+        auction.Make = null;
+        _httpClient.SetFakeJwtBearerToken(AuthHelper.GetBearerForUser("bob"));
+        
+        // act
+        var response = await _httpClient.PostAsJsonAsync("api/auctions", auction);
+
+        // assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     public Task InitializeAsync() => Task.CompletedTask;
